@@ -15,6 +15,8 @@ namespace Ct3dRenderer.Utils
 {
 	static class DebugUtils
 	{
+		public static String LogFilePath = null;
+
 		public static string ToDebugString(this Object obj, int maxDepth = 3)
 		{
 			if (obj == null)
@@ -56,11 +58,6 @@ namespace Ct3dRenderer.Utils
 			return builder.ToString();
 		}
 
-		private static string RemoveJunk(string originalName)
-		{
-			return originalName.StartsWith("<") ? originalName.Substring(1, originalName.Length - 17) : originalName;
-		}
-
 		public static void Log(Object obj)
 		{
 			Log(ToDebugString(obj));
@@ -70,37 +67,39 @@ namespace Ct3dRenderer.Utils
 		
 		public static void Log(String msg)
 		{
-			int logId = Interlocked.Increment(ref _logCounter);
-			bool isError = msg.Contains("!!!"); //TODO
-			if (!isError) Debug.Log(msg); else Debug.LogError(msg);
-			Console.WriteLine(msg);
-			var stackFrame = new StackTrace(1, true).GetFrames().First(f => Path.GetFileName(f.GetFileName()) != typeof(DebugUtils).Name + ".cs");
-			var extendedMsg = (isError ? "!!!\r\n" : "") + 
-				            logId.ToString().PadRight(4) + " " +
-							DateTime.Now.ToString("HH:mm:ss.ffff") + " " +
-							(String.IsNullOrEmpty(stackFrame.GetFileName())
-								? ""
-								: (Path.GetFileName(stackFrame.GetFileName()) + ":" + stackFrame.GetFileLineNumber() + " ")).PadRight(25) +
-							msg +
-							" (thread#" + Thread.CurrentThread.ManagedThreadId + ")";
-            WriteToLogFile(extendedMsg);
-			if(isError)
-				Debug.Break();
+			try
+			{
+				Debug.Log(msg);
+				if (LogFilePath == null)
+					return;
+				int logId = Interlocked.Increment(ref _logCounter);
+				var stackFrame =
+					new StackTrace(1, true).GetFrames()
+						.First(f => Path.GetFileName(f.GetFileName()) != typeof (DebugUtils).Name + ".cs");
+				var extendedMsg = //(isError ? "!!!\r\n" : "") +
+								logId.ToString().PadRight(4) + " " +
+								DateTime.Now.ToString("HH:mm:ss.ffff") + " " +
+								(String.IsNullOrEmpty(stackFrame.GetFileName())
+									? ""
+									: (Path.GetFileName(stackFrame.GetFileName()) + ":" + stackFrame.GetFileLineNumber() + " ")).PadRight(25) +
+								msg +
+								" (thread#" + Thread.CurrentThread.ManagedThreadId + ")";
+				WriteToLogFile(extendedMsg);
+				//if (isError)
+				//	Debug.Break();
+			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
 		}
 
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		private static void WriteToLogFile(string msg)
 		{
 			//needs to be synchronized, otherwise might cause "IOException: Sharing violation on path..."
-			var writer = File.AppendText("log.txt");
+			var writer = File.AppendText(LogFilePath);
 			writer.WriteLine(msg);
-			writer.Dispose();
-		}
-
-		public static void LogFast(String msg)
-		{
-			var writer = File.AppendText("log.txt");
-			writer.WriteLine("FAST: " + msg);
 			writer.Dispose();
 		}
 	}

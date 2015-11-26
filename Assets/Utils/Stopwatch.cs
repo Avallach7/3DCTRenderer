@@ -13,7 +13,7 @@ namespace Ct3dRenderer.Utils
 			_description = description;
 			_stopwatch = new System.Diagnostics.Stopwatch();
 			_stopwatch.Start();
-			DebugUtils.Log(description + ": start");
+			//DebugUtils.Log(description + ": start");
 		}
 
 		public void Stop()

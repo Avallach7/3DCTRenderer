@@ -1,7 +1,9 @@
+using System;
+
 namespace Ct3dRenderer.Rendering
 {
 	public interface IChunkRenderer
 	{
-		void Render();
+		void Render(Action onRendered);
 	}
 }

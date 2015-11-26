@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Ct3dRenderer.Utils;
 using UnityEngine;
 
@@ -7,39 +8,61 @@ namespace Ct3dRenderer.Rendering
 {
 	public class MeshBuilder
 	{
-		public List<Vector3> Vertices;
-		public List<List<int>> TrianglesBySubmesh;
-		public List<Material> Materials;
-		public int materialsCount;
+		public List<Vector3> Vertices { get; private set; }
+		public List<List<int>> TrianglesBySubmesh { get; private set; }
+		public List<Material> Materials { get; private set; }
 		private readonly Mesh _meshToReuse;
 
 		public MeshBuilder(Mesh meshToReuse = null)
 		{
 			_meshToReuse = meshToReuse;
 			Vertices = new List<Vector3>();
-			TrianglesBySubmesh = new List<List<int>> {new List<int>()};
+			TrianglesBySubmesh = new List<List<int>>();
 			Materials = new List<Material>();
+		}
+
+		public void AssertIsValid()
+		{
+			if (Materials.Count != TrianglesBySubmesh.Count)
+				throw new Ct3dRendererException("Materials.Count(" + Materials.Count + ") is not equal to TrianglesBySubmesh.Count(" +
+												TrianglesBySubmesh.Count + ")"); //fires randomly: 3 != 1
 		}
 
 		// can be only called from main thread!
 		public void Apply(GameObject go)
 		{
-			if(0 == Materials.Count) DebugUtils.Log("Cannot apply mesh without materials!!! " + go.name);
+			AssertIsValid();
+            if (TrianglesBySubmesh.Sum(s => s.Count) < 30)
+			{
+				go.SetActive(false);
+				return;
+			}
 			var mesh = _meshToReuse ?? new Mesh();
 			mesh.vertices = Vertices.ToArray();
 			mesh.subMeshCount = TrianglesBySubmesh.Count;
+			UnityEngine.Assertions.Assert.AreEqual(mesh.subMeshCount, TrianglesBySubmesh.Count, "Assignment failed: mesh.subMeshCount = TrianglesBySubmesh.Count");
 			for (int i = 0; i < TrianglesBySubmesh.Count; i++)
-				mesh.SetTriangles(TrianglesBySubmesh[i].ToArray(), i);
+			{
+				if (mesh.subMeshCount != TrianglesBySubmesh.Count)
+					throw new Ct3dRendererException("Assignment failed: mesh.subMeshCount("+ mesh.subMeshCount+ ") != TrianglesBySubmesh.Count(" + TrianglesBySubmesh.Count + ")"); //fires randomly: 7 != 1
+				UnityEngine.Assertions.Assert.AreEqual(mesh.subMeshCount, TrianglesBySubmesh.Count, "mesh.subMeshCount != TrianglesBySubmesh.Count");
+				UnityEngine.Assertions.Assert.IsTrue(i < mesh.subMeshCount, "i="+i+ ", mesh.subMeshCount="+ mesh.subMeshCount + ", TrianglesBySubmesh.Count=" + TrianglesBySubmesh.Count);
+				mesh.SetTriangles(TrianglesBySubmesh[i].ToArray(), i); //Failed setting triangles. Submesh index is out of bounds. UnityEngine.Mesh:SetTriangles(Int32[], Int32)
+			}
 
 			//mesh.Optimize();
 			mesh.RecalculateNormals();
 			go.GetComponent<MeshFilter>().mesh = mesh;
-			go.GetComponent<MeshRenderer>().materials = Materials.ToArray();
+			go.GetComponent<MeshRenderer>().sharedMaterials = Materials.ToArray();
+		}
 
-			DebugUtils.Log("Clearing meshBuilder for obj " + go.name);
-			//Vertices.Clear();
-			//TrianglesBySubmesh.Clear();
-			//Materials.Clear();
+		public void Join(MeshBuilder other)
+		{
+			AssertIsValid();
+			TrianglesBySubmesh.AddRange(other.TrianglesBySubmesh.Select(s => s.Select(v => v+Vertices.Count).ToList()));
+			Vertices.AddRange(other.Vertices);
+			Materials.AddRange(other.Materials);
+			AssertIsValid();
 		}
 	}
 }

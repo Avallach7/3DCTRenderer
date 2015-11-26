@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using Assets.Utils;
 using Ct3dRenderer.Data;
+using Ct3dRenderer.Gui;
 using Ct3dRenderer.Utils;
 using UnityEngine;
 
@@ -11,27 +11,22 @@ namespace Ct3dRenderer.Core
 	{
 		public void Start()
 		{
+			DebugUtils.LogFilePath = Application.persistentDataPath + "/log.txt";
 			Main(Environment.GetCommandLineArgs());
 		}
 
 		public static void Main(String[] args)
 		{
-			DebugUtils.Log("Application start");
-			//TempBenchmark.Run();
+			Debug.Log("Application start");
+			Debug.Log("args = " + args.ToDebugString());
+			Debug.Log("Application.persistentDataPath = " + Application.persistentDataPath);
+			UnityUtils.Create<HudFps>();
 			Scene.Create(new CtScanChunkLoader(GetProjectPath(args)));
-			//var p = new CTScanChunkLoader(GetProjectPath(args));
-			//p.GetChunk(new IntVector3());
-
-			DebugUtils.Log("Application finished");
-			Application.Quit();
-			Debug.DebugBreak();
-			//Environment.Exit(0);
-			//throw new Exception();
 		}
 
 		private static String GetProjectPath(String[] args)
 		{
-			return (args.Length > 1 && args[1] != "-rebuildlibrary") ? args[1] : "DemoCTScan";
+			return (Application.persistentDataPath + "/DemoCTScan");
 		}
 	}
 }

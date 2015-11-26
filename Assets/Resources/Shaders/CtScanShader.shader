@@ -9,48 +9,45 @@
 	{
 		Tags
 		{ 
-			"Queue" = "Transparent" //"AlphaTest" 
-			"IgnoreProjector" = "True"
-			"RenderType" = "Transparent"
+			"Queue"                = "Transparent"
+			"RenderType"           = "Transparent"
+			"IgnoreProjector"      = "True"
 			"ForceNoShadowCasting" = "True"
 		}
 		LOD 100
 
 		Pass
 		{
-			Tags{ "LightMode" = "Always" }
-			ZWrite Off //?
-			AlphaToMask True
+			ZWrite Off // On causes horrible artifacts
 			Blend SrcAlpha OneMinusSrcAlpha
+			//AlphaToMask True // True makes mesh flat and very transparent
 			CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
+				#pragma vertex vert
+				#pragma fragment frag
+		
+				struct appdata_t 
+				{
+					float4 vertex : POSITION;
+				};
 
-			#include "UnityCG.cginc"
+				struct v2f 
+				{
+					float4 vertex : SV_POSITION;
+				};
 
-			struct appdata_t 
-			{
-				float4 vertex : POSITION;
-			};
+				v2f vert(appdata_t v)
+				{
+					v2f o;
+					o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+					return o;
+				}
 
-			struct v2f 
-			{
-				float4 vertex : SV_POSITION;
-			};
+				fixed4 _Color;
 
-			v2f vert(appdata_t v)
-			{
-				v2f o;
-				o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
-				return o;
-			}
-
-			fixed4 _Color;
-
-			fixed4 frag(v2f i) : COLOR
-			{
-				return _Color;
-			}
+				fixed4 frag(v2f i) : COLOR
+				{
+					return _Color;
+				}
 			ENDCG
 		}
 	}

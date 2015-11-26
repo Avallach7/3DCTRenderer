@@ -25,16 +25,6 @@ namespace Ct3dRenderer.Utils
 			return list[(int)(UnityEngine.Random.value * (list.Count - float.Epsilon))];
 		}
 
-		public static void ArrayFill<T>(Array destination, T element)
-		{
-			destination.SetValue(element, Enumerable.Repeat(0, destination.Rank).ToArray());
-			int arrayToFillHalfLength = Enumerable.Range(0, destination.Rank)
-												  .Select(dimension => destination.GetLength(dimension))
-												  .Aggregate(1, (x, y) => x * y) / 2;
-			for (int i = 1; i < destination.Length; i *= 2)
-				Array.Copy(destination, 0, destination, i, (i <= arrayToFillHalfLength) ? i : (destination.Length - i));
-		}
-
 		public static void ArrayFill<T>(T[,,] destination, T element)
 		{
 			for (int x = destination.GetLength(0)-1; x >= 0; x--)

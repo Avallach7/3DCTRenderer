@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using Ct3dRenderer.Data;
 using Ct3dRenderer.Utils;
 using UnityEngine;
@@ -9,32 +10,30 @@ namespace Ct3dRenderer.Rendering
 	public class ThreadedChunkRenderer : UnityObject<ThreadedChunkRenderer>, IChunkRenderer
 	{
 		private IChunk _chunk;
-		private IChunkRenderingAlgorithm _renderingAlgorithm; // TODO: support for multiple at once
-		private MeshBuilder _updatedMesh;
+		private IChunkRenderingAlgorithm[] _renderingAlgorithms;
+        private MeshBuilder _updatedMesh;
 
-		public static ThreadedChunkRenderer Create (IChunk chunk, IChunkRenderingAlgorithm renderingAlgorithm)
+		public static ThreadedChunkRenderer Create (IChunk chunk, IChunkRenderingAlgorithm[] renderingAlgorithms)
 		{
 			var self = Create();
 			self._chunk = chunk;
-			self._renderingAlgorithm = renderingAlgorithm;
+			self._renderingAlgorithms = renderingAlgorithms;
 			self.name = chunk.Position.ToString() + " | " + self.name;
 			self.transform.position = chunk.Position * chunk.Size;
 			//self.gameObject.hideFlags = HideFlags.HideInHierarchy;
 			return self;
 		}
 
-		public void Render()
+		public void Render(Action onRendered)
 		{
-			DebugUtils.Log("Creation of mesh for chunk " + _chunk.Position + ": queued");
+			//DebugUtils.Log("Creation of mesh for chunk " + _chunk.Position + ": queued");
 			ThreadPool.QueueUserWorkItem(state =>
 			{
-				var s = new Stopwatch("Creation of mesh for chunk " + _chunk.Position);
-				_updatedMesh = _renderingAlgorithm.CreateMesh(_chunk);
-				_updatedMesh.materialsCount = _updatedMesh.Materials.Count;
-                if (_updatedMesh.Materials.Count == 0)
-				DebugUtils.Log("Created mesh has no materials in queue!!! " + _chunk.Position);
-				DebugUtils.Log("Creation of mesh for chunk " + _chunk.Position + ": " + _updatedMesh.Materials.Count + " materials");
-				s.Stop();
+				var updatedMesh = _renderingAlgorithms[1].CreateMesh(_chunk);
+				updatedMesh.AssertIsValid();
+				_updatedMesh = updatedMesh;
+				_updatedMesh.Join(_renderingAlgorithms[0].CreateMesh(_chunk));
+				onRendered();
 			});
 		}
 
@@ -42,11 +41,10 @@ namespace Ct3dRenderer.Rendering
 		{
 			if (_updatedMesh != null)
 			{
-				if (_updatedMesh.Materials.Count == 0)
-				DebugUtils.Log("Created mesh has no materials in update!!! " + _chunk.Position);
+				_updatedMesh.AssertIsValid();
 				_updatedMesh.Apply(this.gameObject);
 				_updatedMesh = null;
-				DebugUtils.Log("Mesh for chunk " + _chunk.Position + " updated");
+				//DebugUtils.Log("Mesh for chunk " + _chunk.Position + " updated");
 			}
 		}
 	}

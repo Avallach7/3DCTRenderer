@@ -8,26 +8,26 @@ namespace Ct3dRenderer.Rendering
 {
 	public class XrayChunkRenderingAlgorithm : IChunkRenderingAlgorithm
 	{
-		private static List<Material> Materials = CreateMaterials(7); // todo: try with less materials, may increase performance without quality degradation
+		private static List<Material> Materials = CreateMaterials(1);
 
 		private static List<Material> CreateMaterials(int number)
 		{
-			Shader shader = Shader.Find("Custom/SimpleSemiTransparent");
+			Shader shader = Shader.Find("Custom/CtScanShader");
 			return Enumerable.Range(1, number).Select(i =>
 			{
 				var material = new Material(shader);
-				float alpha = 1f*i/(number);
+				float alpha = Mathf.Pow(1f*i/(number), 3) / 70;
 				float brightness = 1;
 				material.color = new Color(brightness, brightness, brightness, alpha);
-				DebugUtils.Log("CreateMaterial: i=" + i + " => alpha=" + alpha);
+				//DebugUtils.Log("CreateMaterial: i=" + i + " => alpha=" + alpha);
 				return material;
 			}).ToList();
 		}
 
 		private static int GetMaterialIndex(Block block)
 		{
-			var result = block.XrayOpacity * (Materials.Count - 1) / 224;
-			DebugUtils.Log("GetMaterialIndex(" + block.XrayOpacity + ") => " + result);
+			var result = block.XrayOpacity * (Materials.Count) / 224;
+			//DebugUtils.Log("GetMaterialIndex(" + block.XrayOpacity + ") => " + result);
 			return result;
 		}
 
@@ -36,18 +36,15 @@ namespace Ct3dRenderer.Rendering
 			var vertsSize = new IntVector3(chunk.Size.x + 1, chunk.Size.y + 1, chunk.Size.z + 1);
 			var mesh = new MeshBuilder();
             var verticeIndices = new int[vertsSize.x, vertsSize.y, vertsSize.z];
-			for (int x = 0; x < vertsSize.x; x++)
-				for (int y = 0; y < vertsSize.y; y++)
-					for (int z = 0; z < vertsSize.z; z++)
-						verticeIndices[x, y, z] = -1;
-
+			MiscUtils.ArrayFill(verticeIndices, -1);
+			//mesh.TrianglesBySubmesh.AddRange(Enumerable.Repeat(new List<int>(), Materials.Count));
+			mesh.TrianglesBySubmesh.AddRange(Enumerable.Range(0, Materials.Count).Select(i => new List<int>()));
 			for (int x = 0; x < chunk.Size.x; x++)
 				for (int y = 0; y < chunk.Size.y; y++)
 					for (int z = 0; z < chunk.Size.z; z++)
 						CreateBlockMesh(x, y, z, GetMaterialIndex(chunk[x, y, z]), verticeIndices, mesh);
-			mesh.Materials = Materials;
-			if(mesh.Materials.Count == 0)
-			UnityEngine.Assertions.Assert.AreNotEqual(0, mesh.Materials.Count, "Created mesh has no materials!");
+			mesh.Materials.AddRange(Materials);
+			mesh.AssertIsValid();
 			return mesh;
 		}
 
@@ -66,17 +63,7 @@ namespace Ct3dRenderer.Rendering
 			int v6i = GetVerticeIndex(x,     y + 1, z + 1, verticeIndices, mesh.Vertices);
 			int v7i = GetVerticeIndex(x + 1, y + 1, z + 1, verticeIndices, mesh.Vertices);
 
-			//get list of vertices creating triangles
-			List<int> triangles;
-			if (mesh.TrianglesBySubmesh.Count < materialIndex)
-			{
-				triangles = new List<int>();
-				mesh.TrianglesBySubmesh.Add(triangles);
-			}
-			else
-				triangles = mesh.TrianglesBySubmesh[materialIndex - 1];
-
-
+			
 			//create triangles by declaring connections between vertices
 			int[] triangleVertIndices =
 			{
@@ -87,6 +74,7 @@ namespace Ct3dRenderer.Rendering
 				v2i, v7i, v4i,    v6i, v7i, v2i,	// [4] Top
 				v5i, v7i, v3i,    v3i, v7i, v6i		// [5] Back
 			};
+			List<int> triangles = mesh.TrianglesBySubmesh[materialIndex - 1];
 			for (int i = 0; i < 36; i++)
 				triangles.Add(triangleVertIndices[i]);
 		}

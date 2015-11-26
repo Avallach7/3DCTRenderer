@@ -72,25 +72,5 @@ namespace Ct3dRenderer.Data
 					for (int z = 0; z < this.z; z++)
 						yield return new IntVector3(x,y,z);
 		}
-
-		//public bool StrictlySmallerThan(IntVector3 bound)
-		//{
-		//	//return Enumerable.Range(0, 3).All(i => 0 <= pos[i] && pos[i] < _commonStore.Blocks.GetLength(i)); // nice but 15x times slower
-		//	for (int i = 0; i < 3; i++)
-		//		if (0 > pos[i] || pos[i] >= _commonStore.Blocks.GetLength(i))
-		//			return false;
-		//	return true;
-		//}
-		//
-		//public static IntVector3 GetSize(Array array)
-		//{
-		//	UnityEngine.Assertions.Assert.AreEqual(3, array.Rank);
-		//	return new IntVector3
-		//	{
-		//		x = array.GetLength(0),
-		//		y = array.GetLength(1),
-		//		z = array.GetLength(2)
-		//	};
-		//}
 	}
 }
