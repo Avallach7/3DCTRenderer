@@ -21,7 +21,7 @@ namespace Ct3dRenderer.Core
 			Debug.Log("args = " + args.ToDebugString());
 			Debug.Log("Application.persistentDataPath = " + Application.persistentDataPath);
 			UnityUtils.Create<HudFps>();
-			Scene.Create(new CtScanChunkLoader(GetProjectPath(args)));
+			Visualisation.Create(new CtScanChunkLoader(GetProjectPath(args)));
 		}
 
 		private static String GetProjectPath(String[] args)

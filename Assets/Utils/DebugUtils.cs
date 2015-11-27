@@ -76,8 +76,7 @@ namespace Ct3dRenderer.Utils
 				var stackFrame =
 					new StackTrace(1, true).GetFrames()
 						.First(f => Path.GetFileName(f.GetFileName()) != typeof (DebugUtils).Name + ".cs");
-				var extendedMsg = //(isError ? "!!!\r\n" : "") +
-								logId.ToString().PadRight(4) + " " +
+				var extendedMsg = logId.ToString().PadRight(4) + " " +
 								DateTime.Now.ToString("HH:mm:ss.ffff") + " " +
 								(String.IsNullOrEmpty(stackFrame.GetFileName())
 									? ""
@@ -85,8 +84,6 @@ namespace Ct3dRenderer.Utils
 								msg +
 								" (thread#" + Thread.CurrentThread.ManagedThreadId + ")";
 				WriteToLogFile(extendedMsg);
-				//if (isError)
-				//	Debug.Break();
 			}
 			catch (Exception e)
 			{

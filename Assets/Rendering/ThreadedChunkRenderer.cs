@@ -29,10 +29,13 @@ namespace Ct3dRenderer.Rendering
 			//DebugUtils.Log("Creation of mesh for chunk " + _chunk.Position + ": queued");
 			ThreadPool.QueueUserWorkItem(state =>
 			{
-				var updatedMesh = _renderingAlgorithms[1].CreateMesh(_chunk);
-				updatedMesh.AssertIsValid();
+				var updatedMesh = new MeshBuilder();
+				foreach (var renderingAlgorithm in _renderingAlgorithms)
+				{
+					updatedMesh.Join(renderingAlgorithm.CreateMesh(_chunk));
+					updatedMesh.AssertIsValid();
+				}
 				_updatedMesh = updatedMesh;
-				_updatedMesh.Join(_renderingAlgorithms[0].CreateMesh(_chunk));
 				onRendered();
 			});
 		}
@@ -44,7 +47,6 @@ namespace Ct3dRenderer.Rendering
 				_updatedMesh.AssertIsValid();
 				_updatedMesh.Apply(this.gameObject);
 				_updatedMesh = null;
-				//DebugUtils.Log("Mesh for chunk " + _chunk.Position + " updated");
 			}
 		}
 	}

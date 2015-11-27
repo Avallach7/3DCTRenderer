@@ -6,10 +6,9 @@ using UnityEngine;
 
 namespace Ct3dRenderer.Core
 {
-	public class Scene : UnityObject<Scene>
+	public class Visualisation : UnityObject<Visualisation>
 	{
 		private IChunkProvider _chunkProvider;
-
 		private IChunkRenderingAlgorithm[] _renderingAlgorithms = 
 		{
 			new SelectionChunkRenderingAlgorithm(),
@@ -41,7 +40,7 @@ namespace Ct3dRenderer.Core
 			transform.rotation = Quaternion.Euler(270, 0, 0);
 		}
 		
-		public static Scene Create(IChunkProvider chunkProvider)
+		public static Visualisation Create(IChunkProvider chunkProvider)
 		{
 			var self = Create();
 			self._chunkProvider = chunkProvider;
