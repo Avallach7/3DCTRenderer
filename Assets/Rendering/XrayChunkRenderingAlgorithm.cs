@@ -16,7 +16,7 @@ namespace Ct3dRenderer.Rendering
 			return Enumerable.Range(1, number).Select(i =>
 			{
 				var material = new Material(shader);
-				float alpha = Mathf.Pow(1f*i/(number), 3) / 70;
+				float alpha = Mathf.Pow(1f*i/(number), 3) / 60;
 				float brightness = 1;
 				material.color = new Color(brightness, brightness, brightness, alpha);
 				//DebugUtils.Log("CreateMaterial: i=" + i + " => alpha=" + alpha);

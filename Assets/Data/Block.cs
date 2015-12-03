@@ -10,15 +10,19 @@
 
 		public byte XrayOpacity
 		{
-			get { return  (byte) (_data & OpacityMask); }
+			get { return (byte) (_data & OpacityMask); }
 			set { _data = (byte) (value & OpacityMask); }
 		}
 
 		public bool this[int selectionId]
 		{
-			get { return (_data & (1 << (selectionId % MaxSelections))) != 0; }
-			set { _data = value ? (byte)(_data |  (1 << (selectionId % MaxSelections))) : 
-					              (byte)(_data & ~(1 << (selectionId % MaxSelections))); }
+			get { return (_data & (1 << (selectionId%MaxSelections))) != 0; }
+			set
+			{
+				_data = value
+					? (byte) (_data | (1 << (selectionId%MaxSelections)))
+					: (byte) (_data & ~(1 << (selectionId%MaxSelections)));
+			}
 		}
 
 		public byte Data //TODO: remove that dirty performance hack?

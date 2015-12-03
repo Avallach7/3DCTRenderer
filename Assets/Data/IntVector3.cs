@@ -55,6 +55,11 @@ namespace Ct3dRenderer.Data
 			return new IntVector3(a.x * b.x, a.y * b.y, a.z * b.z);
 		}
 
+		public static IntVector3 operator +(IntVector3 a, IntVector3 b)
+		{
+			return new IntVector3(a.x + b.x, a.y + b.y, a.z + b.z);
+		}
+
 		public static implicit operator Vector3(IntVector3 that)
 		{
 			return new Vector3(that.x, that.y, that.z);

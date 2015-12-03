@@ -11,8 +11,9 @@ namespace Ct3dRenderer.Core
 		private IChunkProvider _chunkProvider;
 		private IChunkRenderingAlgorithm[] _renderingAlgorithms = 
 		{
-			new SelectionChunkRenderingAlgorithm(),
-			new XrayChunkRenderingAlgorithm()
+			new SelectionChunkRenderingAlgorithm(), 
+			new XrayChunkRenderingAlgorithm(),
+			new SurfaceChunkRenderingAlgorithm()
 		};
 		private int _renderedChunks;
 		private int _chunksToRender;

@@ -3,6 +3,7 @@ using System.Threading;
 using Ct3dRenderer.Data;
 using Ct3dRenderer.Utils;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Ct3dRenderer.Rendering
 {
@@ -12,6 +13,7 @@ namespace Ct3dRenderer.Rendering
 		private IChunk _chunk;
 		private IChunkRenderingAlgorithm[] _renderingAlgorithms;
         private MeshBuilder _updatedMesh;
+		const bool Multithreaded = true;
 
 		public static ThreadedChunkRenderer Create (IChunk chunk, IChunkRenderingAlgorithm[] renderingAlgorithms)
 		{
@@ -20,14 +22,24 @@ namespace Ct3dRenderer.Rendering
 			self._renderingAlgorithms = renderingAlgorithms;
 			self.name = chunk.Position.ToString() + " | " + self.name;
 			self.transform.position = chunk.Position * chunk.Size;
+			self.SimplifyRendering();
 			//self.gameObject.hideFlags = HideFlags.HideInHierarchy;
 			return self;
+		}
+
+		private void SimplifyRendering()
+		{
+			var meshRenderer = GetComponent<MeshRenderer>();
+			meshRenderer.shadowCastingMode = ShadowCastingMode.Off;
+			meshRenderer.receiveShadows = false;
+			meshRenderer.useLightProbes = false;
+			meshRenderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
 		}
 
 		public void Render(Action onRendered)
 		{
 			//DebugUtils.Log("Creation of mesh for chunk " + _chunk.Position + ": queued");
-			ThreadPool.QueueUserWorkItem(state =>
+			WaitCallback renderAction = state =>
 			{
 				var updatedMesh = new MeshBuilder();
 				foreach (var renderingAlgorithm in _renderingAlgorithms)
@@ -37,7 +49,11 @@ namespace Ct3dRenderer.Rendering
 				}
 				_updatedMesh = updatedMesh;
 				onRendered();
-			});
+			};
+			if (Multithreaded)
+				ThreadPool.QueueUserWorkItem(renderAction);
+			else
+				renderAction(null);
 		}
 
 		public void Update()

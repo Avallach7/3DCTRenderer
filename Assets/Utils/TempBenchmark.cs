@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Ct3dRenderer.Data;
-using Ct3dRenderer.Utils;
-using UnityEngine;
 
-namespace Assets.Utils
+namespace Ct3dRenderer.Utils
 {
 	static class TempBenchmark
 	{

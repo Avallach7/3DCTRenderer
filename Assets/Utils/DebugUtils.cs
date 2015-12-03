@@ -19,6 +19,7 @@ namespace Ct3dRenderer.Utils
 
 		public static string ToDebugString(this Object obj, int maxDepth = 3)
 		{
+#if DEBUG
 			if (obj == null)
 				return "null";
 			else if (Convert.GetTypeCode(obj) != TypeCode.Object)
@@ -56,20 +57,26 @@ namespace Ct3dRenderer.Utils
                 builder.Append("{").Append(String.Join(",", fieldDescriptions)).Append("}");
 			}
 			return builder.ToString();
+#else
+			return "";
+#endif
 		}
 
 		public static void Log(Object obj)
 		{
+#if DEBUG
 			Log(ToDebugString(obj));
+#endif
 		}
 
 		private static int _logCounter;
 		
 		public static void Log(String msg)
 		{
+			Debug.Log(msg);
+#if DEBUG
 			try
 			{
-				Debug.Log(msg);
 				if (LogFilePath == null)
 					return;
 				int logId = Interlocked.Increment(ref _logCounter);
@@ -89,6 +96,7 @@ namespace Ct3dRenderer.Utils
 			{
 				Debug.LogException(e);
 			}
+#endif
 		}
 
 		[MethodImpl(MethodImplOptions.Synchronized)]
