@@ -8,7 +8,14 @@ namespace Ct3dRenderer.Rendering
 {
 	public class XrayChunkRenderingAlgorithm : IChunkRenderingAlgorithm
 	{
-		private static List<Material> Materials = CreateMaterials(1);
+		private static List<Material> _materials = null;
+		private static List<Material> Materials
+		{
+			get
+			{
+				return _materials ?? (_materials = CreateMaterials(1));
+			}
+		}
 
 		private static List<Material> CreateMaterials(int number)
 		{

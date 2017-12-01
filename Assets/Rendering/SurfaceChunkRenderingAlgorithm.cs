@@ -9,11 +9,17 @@ namespace Ct3dRenderer.Rendering
 {
 	public class SurfaceChunkRenderingAlgorithm : IChunkRenderingAlgorithm
 	{
-		public static readonly Material Material =
-				new Material(Shader.Find("Custom/CtScanSelection"))
+		private static Material _material = null;
+		private static Material Material
+		{
+			get
+			{
+				return _material ?? (_material = new Material(Shader.Find("Custom/CtScanSelection"))
 				{
 					color = new Color(0, 0, 0, 220f/255f),
-				};
+				});
+			}
+		}
 
 		public MeshBuilder CreateMesh(IChunk chunk)
 		{

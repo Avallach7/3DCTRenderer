@@ -10,7 +10,14 @@ namespace Ct3dRenderer.Rendering
 {
 	public class SelectionChunkRenderingAlgorithm : IChunkRenderingAlgorithm
 	{
-		private static readonly List<Material> Materials = CreateMaterials(6);
+		private static List<Material> _materials = null;
+		private static List<Material> Materials
+		{
+			get
+			{
+				return _materials ?? (_materials = CreateMaterials(6));
+			}
+		}
 
 		public MeshBuilder CreateMesh(IChunk chunk)
 		{

@@ -1,4 +1,6 @@
-﻿Shader "Custom/CtScanShader" 
+﻿// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Custom/CtScanShader" 
 {
 	Properties
 	{
@@ -38,7 +40,7 @@
 				v2f vert(appdata_t v)
 				{
 					v2f o;
-					o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+					o.vertex = UnityObjectToClipPos(v.vertex);
 					return o;
 				}
 

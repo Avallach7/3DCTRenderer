@@ -13,7 +13,7 @@ namespace Ct3dRenderer.Rendering
 		private IChunk _chunk;
 		private IChunkRenderingAlgorithm[] _renderingAlgorithms;
         private MeshBuilder _updatedMesh;
-		const bool Multithreaded = true;
+		const bool Multithreaded = false;
 
 		public static ThreadedChunkRenderer Create (IChunk chunk, IChunkRenderingAlgorithm[] renderingAlgorithms)
 		{
